@@ -100,3 +100,28 @@ def test_edge_radius_rejects_infinite_radius():
     t = KDTree(); t.build(pts(5))
     with pytest.raises(ValueError):
         t.radius([0] * 5, float("inf"))
+def test_edge_insert_duplicate_id_raises():
+    t = KDTree(); t.build(pts(5))
+    with pytest.raises(ValueError):
+        t.insert(0, [.1] * 5)
+
+def test_edge_insert_into_empty_tree():
+    t = KDTree(); t.build([])
+    t.insert(42, [.3] * 5)
+    assert ids(t.knn([.3] * 5, 1)[0]) == [42] and t.stats()["height"] == 1
+
+def test_edge_deleted_node_is_never_returned():
+    items = pts(100); t = KDTree(); t.build(items)
+    nearest = ids(t.knn(items[0][1], 1)[0])[0]
+    assert t.delete(nearest)
+    assert nearest not in ids(t.knn(items[0][1], 100)[0])
+    assert nearest not in ids(t.radius(items[0][1], 10)[0])
+
+def test_edge_delete_unknown_id_returns_false():
+    t = KDTree(); t.build(pts(5))
+    assert t.delete(99999) is False
+
+def test_edge_reinsert_after_delete_works():
+    t = KDTree(); t.build(pts(10)); t.delete(3)
+    t.insert(3, [.9] * 5)
+    assert 3 in ids(t.knn([.9] * 5, 1)[0])
