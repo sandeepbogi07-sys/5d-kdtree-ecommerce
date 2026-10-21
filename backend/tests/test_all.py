@@ -125,3 +125,25 @@ def test_edge_reinsert_after_delete_works():
     t = KDTree(); t.build(pts(10)); t.delete(3)
     t.insert(3, [.9] * 5)
     assert 3 in ids(t.knn([.9] * 5, 1)[0])
+def test_edge_api_missing_json_body_is_rejected(client):
+    r = client.post("/api/search/knn", data="not json", content_type="text/plain")
+    assert r.status_code in (400, 415, 422)
+
+def test_edge_api_wrong_vector_length_is_rejected(client):
+    assert client.post("/api/search/knn", json={"vector": [0.1, 0.2]}).status_code == 422
+
+def test_edge_api_unknown_product_returns_404(client):
+    assert client.get("/api/products/999999").status_code == 404
+    assert client.delete("/api/products/999999", headers=H).status_code == 404
+
+def test_edge_api_write_with_wrong_admin_token_is_blocked(client):
+    r = client.post("/api/products", json=P, headers={"X-Admin-Token": "wrong"})
+    assert r.status_code == 401
+
+def test_edge_api_duplicate_product_name_is_rejected(client):
+    assert client.post("/api/products", json={**P, "name": "Dup"}, headers=H).status_code == 201
+    r = client.post("/api/products", json={**P, "name": "Dup"}, headers=H)
+    assert r.status_code in (409, 422)
+
+def test_edge_api_price_out_of_range_is_rejected(client):
+    assert client.post("/api/products", json={**P, "price": 10**9}, headers=H).status_code == 422
