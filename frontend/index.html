@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Threadly · Smart Clothing Recommender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--p:#6c5ce7;--p2:#a29bfe;--pink:#fd79a8;--teal:#00cec9;--orange:#fdcb6e;--ink:#1e1b3a;--mut:#6b6894;--bg:#f6f4ff;--card:#fff;--r:20px;--sh:0 10px 30px rgba(108,92,231,.12)}
+*{box-sizing:border-box;margin:0}
+body{font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:0}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:blur(14px);box-shadow:0 2px 20px rgba(108,92,231,.1)}
+.nav{max-width:1240px;margin:auto;padding:14px 24px;display:flex;align-items:center;gap:24px}
+.logo{font-weight:800;font-size:1.5rem;background:linear-gradient(90deg,var(--p),var(--pink));-webkit-background-clip:text;color:transparent}
+.tabs{display:flex;gap:6px;margin-left:auto}
+.tab{background:none;padding:9px 18px;border-radius:99px;font-weight:600;color:var(--mut);transition:.2s}
+.tab:hover{background:#efecff}.tab.on{background:linear-gradient(90deg,var(--p),var(--p2));color:#fff;box-shadow:0 6px 16px rgba(108,92,231,.35)}
+.hero{background:linear-gradient(120deg,#6c5ce7,#fd79a8 70%,#fdcb6e);color:#fff;padding:60px 24px 90px;position:relative;overflow:hidden}
+.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero:before{width:380px;height:380px;right:-80px;top:-120px}.hero:after{width:220px;height:220px;left:8%;bottom:-110px}
+.hero div{max-width:1240px;margin:auto;position:relative}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;font-weight:800;max-width:700px}
+.hero p{margin-top:14px;max-width:560px;opacity:.95}
+.badges{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.badges span{background:rgba(255,255,255,.2);padding:7px 14px;border-radius:99px;font-size:.82rem;font-weight:500}
+main{max-width:1240px;margin:-50px auto 60px;padding:0 24px;position:relative}
+.bar{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.bar input,.bar select{font:inherit;padding:11px 16px;border:2px solid #ece9ff;border-radius:14px;background:#faf9ff;outline:0;transition:.2s}
+.bar input{flex:1;min-width:200px}.bar input:focus,.bar select:focus{border-color:var(--p2)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.chip{padding:8px 16px;border-radius:99px;background:#fff;color:var(--mut);font-weight:500;font-size:.85rem;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:.2s}
+.chip:hover{transform:translateY(-2px)}.chip.on{background:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px}
+.card{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:.25s;position:relative}
+.card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(108,92,231,.25)}
+.img{height:230px;overflow:hidden;display:grid;place-items:center;position:relative}
+.img svg{width:170px;height:170px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.18));transition:.3s}.card:hover .img svg{transform:scale(1.1) rotate(-3deg)}
+.tag{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.9);padding:4px 11px;border-radius:99px;font-size:.72rem;font-weight:600}
+.stock{position:absolute;top:12px;right:12px;font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:99px;color:#fff;background:var(--teal)}.stock.low{background:var(--orange);color:#5a4300}.stock.out{background:#ff7675}
+.info{padding:16px}.info h3{font-size:.95rem;font-weight:600}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.price{font-weight:700;font-size:1.1rem;color:var(--p)}.star{color:#f5a623;font-size:.85rem;font-weight:600}
+.specs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.specs i{font-style:normal;font-size:.7rem;background:#f1eeff;color:var(--p);padding:3px 9px;border-radius:8px;font-weight:500}
+.modal{position:fixed;inset:0;background:rgba(30,27,58,.6);backdrop-filter:blur(6px);z-index:50;display:none;padding:24px;overflow:auto}
+.modal.show{display:block}
+.sheet{background:var(--bg);max-width:1000px;margin:20px auto;border-radius:28px;overflow:hidden;animation:pop .3s}
+@keyframes pop{from{transform:translateY(30px) scale(.97);opacity:0}}
+.top{display:grid;grid-template-columns:1fr 1.2fr;background:#fff}
+.top .img{height:auto;min-height:300px}.top .img svg{width:300px;height:300px}
+.det{padding:32px}.det h2{font-size:1.6rem}.det p{color:var(--mut);margin:10px 0}
+.big{font-size:2rem;font-weight:800;color:var(--p)}
+.x{position:absolute;right:30px;top:30px;width:40px;height:40px;border-radius:50%;background:#fff;font-size:1.3rem;box-shadow:var(--sh);z-index:2}
+.rec{padding:28px 32px 34px}.rec h3{font-size:1.2rem;margin-bottom:6px}
+.ctl{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:12px 0 18px;font-size:.88rem;color:var(--mut)}
+.ctl input[type=range]{accent-color:var(--p)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:#fff;border-radius:16px;padding:14px;box-shadow:var(--sh)}
+.stat b{display:block;font-size:1.35rem;font-weight:800;background:linear-gradient(90deg,var(--p),var(--pink));-webkit-background-clip:text;color:transparent}
+.stat small{color:var(--mut);font-size:.74rem}
+.grid.sm{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}.grid.sm .img{height:130px}.grid.sm .img svg{width:115px;height:115px}
+.match{position:absolute;bottom:10px;right:10px;background:var(--ink);color:#fff;font-size:.7rem;padding:3px 9px;border-radius:99px;font-weight:600}
+.ok{color:#00a88f;font-weight:600}
+.panel{background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:26px;margin-bottom:22px}
+.panel h2{margin-bottom:6px}.panel>p{color:var(--mut);font-size:.9rem;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{background:#f1eeff;color:var(--p);text-align:left;padding:11px 14px;font-weight:600}th:first-child{border-radius:12px 0 0 12px}th:last-child{border-radius:0 12px 12px 0}
+td{padding:11px 14px;border-bottom:1px solid #f0edff}
+.bars{display:flex;flex-direction:column;gap:14px}
+.bl{display:flex;align-items:center;gap:12px;font-size:.82rem}.bl span:first-child{width:80px;color:var(--mut);font-weight:500}
+.track{flex:1;background:#f1eeff;border-radius:99px;height:14px;overflow:hidden}.fill{height:100%;border-radius:99px;transition:width .8s}
+.kd{background:linear-gradient(90deg,var(--p),var(--p2))}.bf{background:linear-gradient(90deg,var(--pink),var(--orange))}
+.btn{background:linear-gradient(90deg,var(--p),var(--pink));color:#fff;padding:12px 26px;border-radius:99px;font-weight:600;box-shadow:0 8px 20px rgba(108,92,231,.35);transition:.2s}.btn:hover{transform:translateY(-2px)}
+.empty{text-align:center;color:var(--mut);padding:60px}
+.utilitybar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.utilitybar .btn{padding:9px 16px;font-size:.82rem}
+.btn.secondary{background:#fff;color:var(--p);border:1px solid #e4dfff;box-shadow:none}
+.cardtools{display:flex;gap:6px;padding:0 14px 14px}.cardtools button{flex:1;border-radius:10px;padding:8px 5px;background:#f1eeff;color:var(--p);font-size:.75rem;font-weight:600}.cardtools button.active{background:var(--p);color:white}
+.drawer{position:fixed;inset:0;background:rgba(30,27,58,.55);z-index:70;display:none;padding:18px;overflow:auto}.drawer.show{display:block}.drawerbox{max-width:850px;margin:30px auto;background:#fff;border-radius:22px;padding:24px;box-shadow:var(--sh)}
+.drawerhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.drawerhead h2{font-size:1.35rem}.itemline{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.itemline button{border-radius:9px;background:#f1eeff;color:var(--p);padding:7px 10px;font-weight:600}.qty{display:flex;gap:8px;align-items:center}.treeviz{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.treenode{border:1px solid #ded8ff;background:#f8f6ff;border-radius:12px;padding:9px 12px;font-size:.78rem;min-width:100px}.treenode b{display:block;color:var(--p)}.treenode small{color:var(--mut)}
+@media(max-width:720px){.drawerbox{padding:16px;margin:8px auto}.itemline{align-items:flex-start;flex-wrap:wrap}.utilitybar .btn{flex:1}.hero{padding:40px 20px 76px}main{padding:0 14px}}
+footer{text-align:center;color:var(--mut);font-size:.82rem;padding:30px}
+.skeleton{height:300px;border-radius:var(--r);background:linear-gradient(90deg,#ece9ff 25%,#f6f4ff 50%,#ece9ff 75%);background-size:200% 100%;animation:sh 1.2s infinite}@keyframes sh{to{background-position:-200% 0}}
+@media(max-width:720px){.top{grid-template-columns:1fr}.nav{flex-wrap:wrap}.tabs{margin-left:0}.rec,.det{padding:20px}}
+
+.shop{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+.side{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:22px;position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto}
+.side h3{display:flex;justify-content:space-between;align-items:center;font-size:1.05rem;margin-bottom:4px}
+.link{background:none;color:var(--p);font-weight:600;font-size:.8rem;text-decoration:underline}
+.fg{padding:16px 0;border-bottom:1px solid #f0edff}.fg:last-child{border:0}
+.fg>label,.fg>.lb{display:flex;justify-content:space-between;font-weight:600;font-size:.88rem;margin-bottom:12px}
+.fg>.lb small{color:var(--mut);font-weight:500}
+.dr{position:relative;height:22px;margin:4px 6px 12px}
+.rail{position:absolute;top:9px;left:0;right:0;height:5px;background:#ece9ff;border-radius:9px}
+.sel{position:absolute;height:100%;background:linear-gradient(90deg,var(--p),var(--pink));border-radius:9px}
+.dr input[type=range]{position:absolute;left:-6px;width:calc(100% + 12px);top:0;height:22px;background:none;pointer-events:none;-webkit-appearance:none;appearance:none;margin:0}
+.dr input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--p);box-shadow:0 3px 8px rgba(108,92,231,.4);cursor:grab}
+.dr input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--p);cursor:grab}
+.nums{display:flex;align-items:center;gap:8px}.nums span{color:var(--mut)}
+.nums input{width:100%;min-width:0;font:inherit;font-size:.85rem;padding:8px 10px;border:2px solid #ece9ff;border-radius:12px;background:#faf9ff;outline:0}.nums input:focus{border-color:var(--p2)}
+.sw{display:flex;flex-wrap:wrap;gap:9px}
+.sw button{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #e4e0ff;transition:.15s}
+.sw button:hover{transform:scale(1.12)}.sw button.on{box-shadow:0 0 0 3px var(--ink);transform:scale(1.12)}
+.side select{width:100%;font:inherit;padding:10px 12px;border:2px solid #ece9ff;border-radius:12px;background:#faf9ff}
+.tg{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:500;cursor:pointer}.tg input{accent-color:var(--p);width:18px;height:18px}
+.meta{display:flex;justify-content:space-between;align-items:center;margin:2px 0 14px;flex-wrap:wrap;gap:8px;font-size:.88rem;color:var(--mut)}
+.act{display:flex;gap:8px;flex-wrap:wrap}.act span{background:#efecff;color:var(--p);font-size:.76rem;font-weight:600;padding:5px 12px;border-radius:99px}
+.fbtn{display:none;margin-bottom:14px;width:100%}
+@media(max-width:900px){.shop{grid-template-columns:1fr}.side{position:static;max-height:none;display:none}.side.open{display:block}.fbtn{display:block}}
+</style>
+</head>
+<body>
+<header><div class="nav"><div class="logo">🧵 Threadly</div>
+<div class="tabs"><button class="tab on" data-v="shop">Shop</button><button class="tab" data-v="insights">KD-Tree Insights</button></div></div></header>
+
+<section class="hero"><div>
+<h1>Find clothes you'll love, <br>matched in 5 dimensions.</h1>
+<p>Smart recommendations powered by a custom KD-Tree — comparing price, fabric weight, stretch and colour in milliseconds.</p>
+<div class="badges"><span>💰 Price</span><span>🧶 GSM</span><span>↔️ Stretch</span><span>🎨 Hue (cos/sin)</span></div>
+</div></section>
+
+<main>
+<section id="shop">
+ <button class="btn fbtn" onclick="document.getElementById('side').classList.toggle('open')">🎛️ Filters</button>
+ <div class="shop">
+ <aside class="side" id="side">
+  <h3>🎛️ Filters <button class="link" onclick="resetF()">Reset all</button></h3>
+  <div class="fg"><div class="lb">💰 Price <small>₹</small></div><div class="dr" data-k="price"><div class="rail"><div class="sel"></div></div><input type="range" class="lo"><input type="range" class="hi"></div><div class="nums"><input type="number" class="nlo"><span>–</span><input type="number" class="nhi"></div></div>
+  <div class="fg"><div class="lb">🧶 Fabric weight <small>GSM</small></div><div class="dr" data-k="gsm"><div class="rail"><div class="sel"></div></div><input type="range" class="lo"><input type="range" class="hi"></div><div class="nums"><input type="number" class="nlo"><span>–</span><input type="number" class="nhi"></div></div>
+  <div class="fg"><div class="lb">↔️ Stretch <small>%</small></div><div class="dr" data-k="el"><div class="rail"><div class="sel"></div></div><input type="range" class="lo"><input type="range" class="hi"></div><div class="nums"><input type="number" class="nlo" step="0.5"><span>–</span><input type="number" class="nhi" step="0.5"></div></div>
+  <div class="fg"><div class="lb">🎨 Colour <small id="cn"></small></div><div class="sw" id="sw"></div></div>
+  <div class="fg"><label for="rt">⭐ Minimum rating</label><select id="rt"><option value="0">Any rating</option><option value="3.5">3.5 &amp; up</option><option value="4">4.0 &amp; up</option><option value="4.5">4.5 &amp; up</option></select></div>
+  <div class="fg"><label class="tg"><input type="checkbox" id="ins"> In stock only</label></div>
+ </aside>
+ <div>
+  <div class="bar">
+   <input id="q" placeholder="🔍  Search products, colours…">
+   <select id="sort"><option value="">Sort: Featured</option><option value="kd">🧠 Best match to my ranges (KD-tree)</option><option value="pa">Price: Low → High</option><option value="pd">Price: High → Low</option><option value="r">Top rated</option></select>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="utilitybar"><button class="btn secondary" onclick="showDrawer('cart')">🛒 Cart <span id="cartCount">0</span></button><button class="btn secondary" onclick="showDrawer('wish')">♡ Wishlist <span id="wishCount">0</span></button><button class="btn secondary" onclick="showDrawer('compare')">⇄ Compare <span id="compareCount">0</span></button></div><div class="meta"><div id="count"></div><div class="act" id="act"></div></div>
+  <div class="grid" id="grid"></div>
+ </div>
+ </div>
+</section>
+
+<section id="insights" hidden>
+ <div class="stats" id="tstats"></div>
+ <div class="panel"><h2>⚡ Benchmark: KD-Tree vs Brute Force</h2><p>Average kNN query time (ms) on synthetic 5D data. Shorter is faster.</p>
+  <button class="btn" id="runb">Run benchmark</button><div id="bench" style="margin-top:22px"></div></div>
+ <div class="panel"><h2>🌳 KD-Tree structure explorer</h2><p>A sample of the live tree, showing each split axis and product vector values. The tree cycles through five dimensions as it descends.</p><button class="btn" id="treeb">Visualize tree</button><div id="treeviz" class="treeviz"></div></div>
+ <div class="panel"><h2>🧠 How it works</h2><p>Each product becomes a 5D vector: <b>[price, GSM, stretch, cos(hue), sin(hue)]</b>. A KD-tree splits space by the median along a rotating axis, so searches can prune whole branches that cannot contain closer neighbours.</p></div>
+</section>
+</main>
+
+<div class="drawer" id="drawer" onclick="if(event.target.id==='drawer')closeDrawer()"><div class="drawerbox"><div class="drawerhead"><h2 id="drawerTitle">Your cart</h2><button class="x" style="position:static" onclick="closeDrawer()">×</button></div><div id="drawerBody"></div></div></div>
+<div class="modal" id="modal"><div class="sheet" style="position:relative"><button class="x" onclick="closeM()">×</button><div id="mbody"></div></div></div>
+<footer>Built with a custom 5D KD-Tree · Flask · in-memory data</footer>
+
+<script>
+const $=s=>document.querySelector(s),api=u=>fetch(u).then(r=>r.json());
+let all=[],cat='',K=6,uid=0,cols=new Set(),B={},F={},kdRank=null;
+const cart=new Map(),wishlist=new Set(),compareSet=new Set();
+const emoji={"T-Shirt":"👕","Shirt":"👔","Jeans":"👖","Trousers":"👖","Jacket":"🧥","Dress":"👗"};
+const DEF={price:{step:50,get:p=>p.price},gsm:{step:5,get:p=>p.gsm},el:{step:.5,get:p=>p.elasticity}};
+const RANGES={price:[300,8000],gsm:[80,600],el:[0,40]};
+
+/* ---------- realistic garment rendering (layered gradients, folds, stitching, fabric grain) ---------- */
+const SHAPES={
+"T-Shirt":"M70 26L33 44 14 88l30 10 14-14v90q42 10 84 0V84l14 14 30-10-19-44-37-18q-30 26-60 0z",
+"Shirt":"M66 24L28 46 10 132l32 8 14-44v82q44 10 88 0V96l14 44 32-8-18-86-38-22-34 22z",
+"Jeans":"M56 16h88l10 172h-46l-8-104-8 104H46z",
+"Trousers":"M58 16h84l8 172h-44l-6-98-6 98H50z",
+"Jacket":"M64 22L26 44 8 156l34 8 12-66v82q46 10 92 0V98l12 66 34-8-18-112-38-22-34 18z",
+"Dress":"M76 14q4 22 24 24t24-24l10 4-6 52 28 112q-60 16-120 0l28-112-6-52z"};
+function detail(c,d,hl){const s=`stroke="${d}" fill="none" stroke-linecap="round"`,st=`stroke="rgba(255,255,255,.55)" fill="none" stroke-dasharray="3 3" stroke-linecap="round"`;
+ switch(c){
+ case"T-Shirt":return `<path d="M70 26q30 30 60 0q-30 48-60 0z" fill="${d}" opacity=".85"/><path d="M72 30q28 24 56 0" ${st}/><path d="M58 84v8M142 84v8" ${st}/><path d="M60 176q40 8 80 0" ${st}/>`;
+ case"Shirt":return `<path d="M66 24L100 74 100 34z" fill="#fff" opacity=".92"/><path d="M134 24L100 74 100 34z" fill="#fff" opacity=".78"/><path d="M66 24L100 74M134 24L100 74" ${s} stroke-width="1.5"/><path d="M100 74v108" ${s} stroke-width="1.5"/>${[92,112,132,152].map(y=>`<circle cx="100" cy="${y}" r="2.6" fill="#fff" stroke="${d}" stroke-width=".8"/>`).join('')}<path d="M92 112q-14 2-14 14h20" ${s} opacity=".5"/>`;
+ case"Jeans":return `<rect x="56" y="16" width="88" height="14" fill="${d}" opacity=".55"/><path d="M100 30v54" ${st}/><path d="M100 84q-10 2-12-8" ${st}/><path d="M58 34q10 34 34 18" ${st}/><path d="M142 34q-10 34-34 18" ${st}/><path d="M60 188v-6M140 188v-6" ${st}/><circle cx="100" cy="23" r="3.4" fill="#e9c46a" stroke="#a37a1c" stroke-width=".8"/>${[66,82,118,134].map(x=>`<rect x="${x-2}" y="14" width="4" height="18" fill="${d}" opacity=".5"/>`).join('')}`;
+ case"Trousers":return `<rect x="58" y="16" width="84" height="12" fill="${d}" opacity=".5"/><path d="M80 30v152M120 30v152" stroke="rgba(0,0,0,.18)" stroke-width="1.5" fill="none"/><path d="M62 34q10 22 24 14M138 34q-10 22-24 14" ${s} opacity=".6"/><circle cx="100" cy="22" r="3" fill="#ddd" stroke="${d}" stroke-width=".8"/><path d="M100 28v56" ${s} opacity=".5"/>`;
+ case"Jacket":return `<path d="M64 22L100 78 100 36z" fill="${d}" opacity=".8"/><path d="M136 22L100 78 100 36z" fill="${d}" opacity=".65"/><path d="M100 78v102" stroke="#cfcfd8" stroke-width="3" stroke-dasharray="2 2"/><rect x="97" y="76" width="6" height="9" rx="2" fill="#bbb"/><path d="M62 128h26M112 128h26" ${s} stroke-width="1.8" opacity=".7"/><path d="M54 98v10M146 98v10" ${st}/><path d="M58 178q42 8 84 0" ${st}/>`;
+ case"Dress":return `<path d="M64 70q36 12 72 0l-2 10q-34 12-68 0z" fill="${d}" opacity=".6"/><path d="M76 14q4 22 24 24t24-24" ${s} stroke-width="1.6"/><path d="M78 84l-18 100M122 84l18 100M100 84v108" stroke="rgba(0,0,0,.14)" stroke-width="1.6" fill="none"/>`}
+}
+function art(p){const id='a'+(++uid),c=p.category,col=`hsl(${Math.round(p.hue)} 62% 56%)`,hi=`hsl(${Math.round(p.hue)} 70% 72%)`,lo=`hsl(${Math.round(p.hue)} 62% 34%)`,dk=`hsl(${Math.round(p.hue)} 60% 28%)`;
+ const heavy=c=="Jeans"||c=="Jacket"?.28:c=="T-Shirt"?.14:.18, freq=c=="Jeans"?'.9 .15':'.7 .7';
+ if(p.image&&/^(https?:|\/img|\/static)/.test(p.image))return `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">`;
+ return `<svg viewBox="0 0 200 200" class="g"><defs>
+ <linearGradient id="${id}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hi}"/><stop offset=".55" stop-color="${col}"/><stop offset="1" stop-color="${lo}"/></linearGradient>
+ <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".38"/><stop offset=".22" stop-color="#000" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".16"/><stop offset=".78" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".42"/></linearGradient>
+ <filter id="${id}t" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="2" seed="${p.id}"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${heavy*3} -.${c=="Jeans"?'18':'30'}"/></filter>
+ <filter id="${id}f"><feGaussianBlur stdDeviation="2.2"/></filter>
+ <filter id="${id}d"><feGaussianBlur stdDeviation="5"/></filter>
+ <clipPath id="${id}c"><path d="${SHAPES[c]}"/></clipPath></defs>
+ <ellipse cx="100" cy="193" rx="62" ry="7" fill="#000" opacity=".22" filter="url(#${id}d)"/>
+ <path d="${SHAPES[c]}" fill="url(#${id}b)"/>
+ <g clip-path="url(#${id}c)">
+  <rect width="200" height="200" fill="url(#${id}s)"/>
+  <rect width="200" height="200" filter="url(#${id}t)"/>
+  <g filter="url(#${id}f)" fill="none" stroke-linecap="round">
+   <path d="M78 96q-6 40 0 80M124 100q8 36 2 76M104 60q-4 50 4 110" stroke="#000" stroke-opacity=".2" stroke-width="5"/>
+   <path d="M90 90q-4 40 2 84M114 86q6 40 0 88" stroke="#fff" stroke-opacity=".28" stroke-width="4"/>
+   <path d="M30 70q10 10 22 8M170 70q-10 10-22 8" stroke="#000" stroke-opacity=".22" stroke-width="5"/>
+  </g></g>
+ ${detail(c,dk)}
+ <path d="${SHAPES[c]}" fill="none" stroke="${dk}" stroke-width="2.2" stroke-linejoin="round" opacity=".85"/></svg>`}
+const bgs=p=>`background:radial-gradient(circle at 50% 35%,#fff 0,hsl(${Math.round(p.hue)} 55% 94%) 45%,hsl(${Math.round(p.hue+25)} 45% 86%) 100%)`;
+
+function card(p,extra=''){const st=p.stock==0?['out','Sold out']:p.stock<10?['low','Only '+p.stock+' left']:['','In stock'];
+ const isWish=wishlist.has(p.id),isComp=compareSet.has(p.id);
+ return `<div class="card" onclick="openM(${p.id})"><div class="img" style="${bgs(p)}">${art(p)}<span class="tag">${emoji[p.category]} ${p.category}</span>${extra?'':`<span class="stock ${st[0]}">${st[1]}</span>`}${extra}</div><div class="info"><h3>${p.name}</h3><div class="row"><span class="price">₹${p.price.toLocaleString('en-IN')}</span><span class="star">★ ${p.rating}</span></div><div class="specs"><i>${p.gsm} GSM</i><i>${p.elasticity}% stretch</i></div></div><div class="cardtools"><button onclick="event.stopPropagation();addCart(${p.id})" ${p.stock?'':'disabled'}>🛒 Add</button><button class="${isWish?'active':''}" onclick="event.stopPropagation();toggleWish(${p.id})">${isWish?'♥ Saved':'♡ Save'}</button><button class="${isComp?'active':''}" onclick="event.stopPropagation();toggleCompare(${p.id})">${isComp?'✓ Selected':'⇄ Compare'}</button></div></div>`}
+function addCart(id){const p=all.find(x=>x.id===id);if(!p||p.stock<=0)return;const old=cart.get(id)||0;if(old>=p.stock){alert('No more stock available for this item.');return}cart.set(id,old+1);refreshCounts();if($('#drawer').classList.contains('show'))showDrawer('cart')}
+function toggleWish(id){wishlist.has(id)?wishlist.delete(id):wishlist.add(id);refreshCounts();apply()}
+function toggleCompare(id){if(compareSet.has(id))compareSet.delete(id);else if(compareSet.size>=3){alert('Compare up to 3 products at a time.');return}else compareSet.add(id);refreshCounts();apply()}
+function refreshCounts(){$('#cartCount').textContent=[...cart.values()].reduce((a,b)=>a+b,0);$('#wishCount').textContent=wishlist.size;$('#compareCount').textContent=compareSet.size}
+function showDrawer(which){const box=$('#drawerBody');$('#drawerTitle').textContent=which==='cart'?'🛒 Shopping cart':which==='wish'?'♡ Wishlist':'⇄ Product comparison';$('#drawer').classList.add('show');document.body.style.overflow='hidden';
+ if(which==='cart'){let entries=[...cart].map(([id,qty])=>({p:all.find(p=>p.id===id),qty})).filter(x=>x.p);const total=entries.reduce((n,x)=>n+x.p.price*x.qty,0);box.innerHTML=entries.length?entries.map(({p,qty})=>`<div class="itemline"><div><b>${p.name}</b><div>₹${p.price.toLocaleString('en-IN')} each</div></div><div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><b>${qty}</b><button onclick="changeQty(${p.id},1)">+</button><button onclick="cart.delete(${p.id});refreshCounts();showDrawer('cart')">Remove</button></div></div>`).join('')+`<h3 style="text-align:right;margin-top:18px">Subtotal: ₹${total.toLocaleString('en-IN')}</h3><p style="color:var(--mut);margin-top:8px">Demo cart only — no payment or order is submitted.</p>`:'<div class="empty">Your cart is empty. Add a product to get started.</div>'}
+ else if(which==='wish'){const ps=all.filter(p=>wishlist.has(p.id));box.innerHTML=ps.length?ps.map(p=>`<div class="itemline"><b>${p.name} · ₹${p.price.toLocaleString('en-IN')}</b><div><button onclick="openM(${p.id});closeDrawer()">View</button> <button onclick="toggleWish(${p.id});showDrawer('wish')">Remove</button></div></div>`).join(''):'<div class="empty">Your wishlist is empty.</div>'}
+ else {const ps=all.filter(p=>compareSet.has(p.id));box.innerHTML=ps.length?`<div style="overflow-x:auto"><table><tr><th>Feature</th>${ps.map(p=>`<th>${p.name}</th>`).join('')}</tr>${[['Price',p=>`₹${p.price.toLocaleString('en-IN')}`],['Category',p=>p.category],['GSM',p=>p.gsm],['Stretch',p=>p.elasticity+'%'],['Colour',p=>p.color],['Rating',p=>'★ '+p.rating],['Stock',p=>p.stock]].map(([label,fn])=>`<tr><td><b>${label}</b></td>${ps.map(p=>`<td>${fn(p)}</td>`).join('')}</tr>`).join('')}</table></div><p style="margin-top:12px;color:var(--mut)">Select up to three products using Compare on product cards.</p>`:'<div class="empty">Select products from the catalog to compare them.</div>'}}
+function changeQty(id,delta){const p=all.find(x=>x.id===id),q=cart.get(id)||0,n=q+delta;if(n<=0)cart.delete(id);else if(n<=p.stock)cart.set(id,n);else alert('Stock limit reached.');refreshCounts();showDrawer('cart')}
+function closeDrawer(){$('#drawer').classList.remove('show');document.body.style.overflow=''}
+
+/* ---------- filters ---------- */
+function setupRange(k){const el=document.querySelector(`.dr[data-k="${k}"]`),box=el.parentElement,lo=el.querySelector('.lo'),hi=el.querySelector('.hi'),nlo=box.querySelector('.nlo'),nhi=box.querySelector('.nhi'),sel=el.querySelector('.sel');
+ const [mn,mx]=B[k],step=DEF[k].step;
+ [lo,hi].forEach(i=>{i.min=mn;i.max=mx;i.step=step});[nlo,nhi].forEach(i=>{i.min=mn;i.max=mx;i.step=step});
+ const draw=()=>{const [a,b]=F[k];lo.value=a;hi.value=b;nlo.value=a;nhi.value=b;
+  sel.style.left=(a-mn)/(mx-mn)*100+'%';sel.style.right=(100-(b-mn)/(mx-mn)*100)+'%'};
+ const clamp=v=>Math.min(mx,Math.max(mn,+v));
+ lo.oninput=()=>{F[k][0]=Math.min(+lo.value,F[k][1]);draw();apply()};
+ hi.oninput=()=>{F[k][1]=Math.max(+hi.value,F[k][0]);draw();apply()};
+ nlo.onchange=()=>{F[k][0]=Math.min(clamp(nlo.value||mn),F[k][1]);draw();apply()};
+ nhi.onchange=()=>{F[k][1]=Math.max(clamp(nhi.value||mx),F[k][0]);draw();apply()};
+ el._draw=draw;draw()}
+function initFilters(){
+ for(const k in DEF){const v=all.map(DEF[k].get),st=DEF[k].step;B[k]=[Math.floor(Math.min(...v)/st)*st,Math.ceil(Math.max(...v)/st)*st];F[k]=[...B[k]];setupRange(k)}
+ const seen={};all.forEach(p=>seen[p.color]=p.hue);
+ const cs=Object.entries(seen).sort((a,b)=>a[1]-b[1]);
+ $('#sw').innerHTML=cs.map(([n,h])=>`<button title="${n}" data-c="${n}" style="background:hsl(${n=='Navy'?240:h} ${n=='Navy'?70:75}% ${n=='Navy'?30:55}%)"></button>`).join('');
+ document.querySelectorAll('#sw button').forEach(b=>b.onclick=()=>{const c=b.dataset.c;cols.has(c)?cols.delete(c):cols.add(c);b.classList.toggle('on');apply()});
+ $('#rt').onchange=apply;$('#ins').onchange=apply}
+function resetF(){for(const k in B){F[k]=[...B[k]];document.querySelector(`.dr[data-k="${k}"]`)._draw()}
+ cols.clear();document.querySelectorAll('#sw button').forEach(b=>b.classList.remove('on'));$('#rt').value=0;$('#ins').checked=false;$('#q').value='';cat='';
+ document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.c==''));apply()}
+function filtered(){const mr=+$('#rt').value,io=$('#ins').checked,q=$('#q').value.toLowerCase();
+ return all.filter(p=>(!cat||p.category==cat)&&p.price>=F.price[0]&&p.price<=F.price[1]&&p.gsm>=F.gsm[0]&&p.gsm<=F.gsm[1]&&p.elasticity>=F.el[0]&&p.elasticity<=F.el[1]&&(!cols.size||cols.has(p.color))&&p.rating>=mr&&(!io||p.stock>0)&&p.name.toLowerCase().includes(q))}
+async function kdOrder(){ // ideal product = centre of every chosen range; KD-tree finds the nearest products
+ const mid=k=>(F[k][0]+F[k][1])/2,n=(v,k)=>Math.min(1,Math.max(0,(v-RANGES[k][0])/(RANGES[k][1]-RANGES[k][0])));
+ let hv=[0,0],w=[1,1,1,0,0];
+ if(cols.size){let x=0,y=0;all.filter(p=>cols.has(p.color)).forEach(p=>{x+=Math.cos(p.hue*Math.PI/180);y+=Math.sin(p.hue*Math.PI/180)});const m=Math.hypot(x,y)||1;hv=[x/m,y/m];w=[1,1,1,1,1]}
+ const body={vector:[n(mid('price'),'price'),n(mid('gsm'),'gsm'),n(mid('el'),'el'),...hv],k:all.length,weights:w},key=JSON.stringify(body);
+ if(kdRank&&kdRank.key==key)return kdRank;
+ const d=await fetch('/api/search/knn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
+ kdRank={key,order:new Map(d.results.map((r,i)=>[r.product.id,i])),m:d.metrics};return kdRank}
+async function apply(){let l=filtered();const s=$('#sort').value;let note='';
+ if(s=='pa')l.sort((a,b)=>a.price-b.price);if(s=='pd')l.sort((a,b)=>b.price-a.price);if(s=='r')l.sort((a,b)=>b.rating-a.rating);
+ if(s=='kd'){try{const r=await kdOrder();l.sort((a,b)=>r.order.get(a.id)-r.order.get(b.id));note=`<span>🧠 KD-tree ranked in ${r.m.time_ms.toFixed(2)} ms</span>`}catch(e){}}
+ const tags=[];['price','gsm','el'].forEach(k=>{if(F[k][0]!=B[k][0]||F[k][1]!=B[k][1])tags.push(`${{price:'₹',gsm:'GSM ',el:'Stretch '}[k]}${F[k][0]}–${F[k][1]}${k=='el'?'%':''}`)});
+ cols.forEach(c=>tags.push('🎨 '+c));if(+$('#rt').value)tags.push('★ '+$('#rt').value+'+');if($('#ins').checked)tags.push('In stock');
+ $('#cn').textContent=cols.size?cols.size+' selected':'any';
+ $('#count').innerHTML=`Showing <b>${l.length}</b> of ${all.length} products`;
+ $('#act').innerHTML=tags.map(t=>`<span>${t}</span>`).join('')+note;
+ $('#grid').innerHTML=l.length?l.map(p=>card(p)).join(''):'<div class="empty" style="grid-column:1/-1">😕 No products match these filters.<br><br><button class="btn" onclick="resetF()">Reset filters</button></div>'}
+const render=apply;
+
+async function init(){$('#grid').innerHTML='<div class="skeleton"></div>'.repeat(4);
+ const d=await api('/api/products');all=d.products;
+ const cats=['',...new Set(all.map(p=>p.category))];
+ $('#chips').innerHTML=cats.map(c=>`<button class="chip ${c==cat?'on':''}" data-c="${c}">${c?emoji[c]+' '+c:'✨ All'}</button>`).join('');
+ document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cat=b.dataset.c;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x==b));apply()});
+ initFilters();apply();loadStats()}
+$('#q').oninput=apply;$('#sort').onchange=apply;
+async function openM(id){const p=all.find(x=>x.id==id);$('#modal').classList.add('show');document.body.style.overflow='hidden';
+ $('#mbody').innerHTML=`<div class="top"><div class="img" style="${bgs(p)}">${art(p)}</div><div class="det"><span class="tag" style="position:static;background:#f1eeff;color:var(--p)">${emoji[p.category]} ${p.category}</span><h2 style="margin-top:12px">${p.name}</h2><p>${p.description}</p>
+ <div class="big">₹${p.price.toLocaleString('en-IN')}</div><div class="specs" style="margin:14px 0"><i>${p.gsm} GSM</i><i>${p.elasticity}% stretch</i><i>Hue ${p.hue.toFixed(0)}°</i><i>★ ${p.rating}</i><i>${p.stock} in stock</i></div>
+ <button class="btn" onclick="addCart(${p.id})" ${p.stock?'':'disabled style="opacity:.5"'}>🛒 Add to cart</button> <button class="btn secondary" onclick="toggleWish(${p.id})">♡ Wishlist</button> <button class="btn secondary" onclick="toggleCompare(${p.id})">⇄ Compare</button></div></div>
+ <div class="rec"><h3>✨ You may also like</h3><div class="ctl">Show <input type="range" min="1" max="12" value="${K}" id="kr"> <b id="kv">${K}</b> similar items</div><div id="rb"><div class="skeleton" style="height:140px"></div></div></div>`;
+ $('#kr').oninput=e=>{K=e.target.value;$('#kv').textContent=K};$('#kr').onchange=()=>loadRec(id);loadRec(id)}
+async function loadRec(id){const d=await api(`/api/recommendations/${id}?k=${K}&compare=1`);if(d.error){$('#rb').innerHTML=d.error;return}
+ const m=d.metrics,b=d.brute_force,mx=Math.max(...d.results.map(r=>r.distance))||1;
+ $('#rb').innerHTML=`<div class="stats"><div class="stat"><b>${m.time_ms.toFixed(2)} ms</b><small>KD-tree time</small></div><div class="stat"><b>${m.nodes_visited}</b><small>Nodes visited</small></div><div class="stat"><b>${m.branches_pruned}</b><small>Branches pruned</small></div><div class="stat"><b>${m.distance_calculations}</b><small>Distance calcs${b?' (brute: '+b.distance_calculations+')':''}</small></div>${b?`<div class="stat"><b class="ok" style="-webkit-text-fill-color:initial">${b.agrees?'✔ Match':'✘ Differ'}</b><small>vs brute force</small></div>`:''}</div>
+ <div class="grid sm">${d.results.map(r=>card(r.product,`<span class="match">${Math.round((1-r.distance/(mx*1.15))*100)}% match</span>`)).join('')}</div>`}
+function closeM(){$('#modal').classList.remove('show');document.body.style.overflow=''}
+$('#modal').onclick=e=>{if(e.target.id=='modal')closeM()};document.onkeydown=e=>{if(e.key=='Escape')closeM()};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x==t));$('#shop').hidden=t.dataset.v!='shop';$('#insights').hidden=t.dataset.v!='insights'});
+async function loadStats(){const s=await api('/api/kdtree/stats');
+ $('#tstats').innerHTML=Object.entries(s).map(([k,v])=>`<div class="stat"><b>${typeof v=='number'?+v.toFixed(2):typeof v=='object'?'—':v}</b><small>${k.replace(/_/g,' ')}</small></div>`).join('')}
+$('#treeb').onclick=async()=>{const d=await api('/api/kdtree/visualization');$('#treeviz').innerHTML=d.nodes.map(n=>`<div class="treenode"><b>Depth ${n.depth} · ${n.axis_name}</b><small>Product #${n.product_id}<br>Split: ${Number(n.split_value).toFixed(3)}<br>${n.left?'← left':''} ${n.right?'right →':''}</small></div>`).join('')||'<p>No tree nodes available.</p>'};
+$('#runb').onclick=async()=>{const b=$('#runb');b.textContent='Running…';const d=await api('/api/benchmark');b.textContent='Run again';
+ const mx=Math.max(...d.benchmark.map(x=>Math.max(x.kdtree_ms_mean,x.brute_ms_mean)));
+ $('#bench').innerHTML=`<div class="bars">${d.benchmark.map(x=>`<div><b style="font-size:.85rem">${x.n} products</b>
+ <div class="bl"><span>KD-tree</span><div class="track"><div class="fill kd" style="width:${x.kdtree_ms_mean/mx*100}%"></div></div><span>${x.kdtree_ms_mean.toFixed(3)} ms</span></div>
+ <div class="bl"><span>Brute force</span><div class="track"><div class="fill bf" style="width:${x.brute_ms_mean/mx*100}%"></div></div><span>${x.brute_ms_mean.toFixed(3)} ms</span></div></div>`).join('')}</div>
+ <table style="margin-top:24px"><tr><th>N<th>KD nodes visited<th>KD dist calcs<th>Brute calcs<th>Agree</tr>${d.benchmark.map(x=>`<tr><td>${x.n}<td>${x.kd_nodes_visited_mean.toFixed(1)}<td>${x.kd_dist_calcs_mean.toFixed(1)}<td>${x.brute_dist_calcs}<td>${x.results_agree?'✅':'❌'}</tr>`).join('')}</table>
+ <p style="margin-top:14px;color:var(--mut);font-size:.82rem">ℹ️ ${d.note}</p>`};
+init();
+</script>
+</body>
+</html>
